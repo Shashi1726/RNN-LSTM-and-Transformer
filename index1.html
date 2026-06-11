@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GoEmotions Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #08090f;
+      --surface-1: rgba(255,255,255,0.04);
+      --surface-2: rgba(255,255,255,0.07);
+      --surface-3: rgba(255,255,255,0.11);
+      --border: rgba(255,255,255,0.09);
+      --border-active: rgba(99,179,237,0.5);
+      --ink: #f0f4ff;
+      --ink-2: rgba(240,244,255,0.55);
+      --ink-3: rgba(240,244,255,0.3);
+      --blue: #4f9eff;
+      --blue-glow: rgba(79,158,255,0.25);
+      --cyan: #63b3ed;
+      --violet: #a78bfa;
+      --violet-glow: rgba(167,139,250,0.2);
+      --green: #34d399;
+      --green-glow: rgba(52,211,153,0.2);
+      --amber: #fbbf24;
+      --rose: #f87171;
+      --rose-glow: rgba(248,113,113,0.2);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND ─────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(79,158,255,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 90% 90%, rgba(167,139,250,0.1) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(52,211,153,0.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Subtle grid overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── LAYOUT ─────────────────────────────────── */
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(1200px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 36px 0 60px;
+      display: grid;
+      gap: 24px;
+    }
+
+    /* ── HEADER ─────────────────────────────────── */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      padding-bottom: 8px;
+      animation: fadeDown 0.7s ease both;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--blue), var(--violet));
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      box-shadow: 0 0 28px var(--blue-glow), 0 0 60px rgba(79,158,255,0.1);
+      flex-shrink: 0;
+    }
+
+    .header-text h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(26px, 4vw, 42px);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      background: linear-gradient(135deg, #fff 30%, var(--cyan) 80%, var(--violet) 110%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--ink-2);
+      font-size: 14px;
+      margin-top: 6px;
+      font-weight: 300;
+      letter-spacing: 0.01em;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-2);
+      backdrop-filter: blur(12px);
+      color: var(--ink-2);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: border-color 0.3s, color 0.3s;
+      flex-shrink: 0;
+    }
+
+    .status-pill.is-online {
+      border-color: rgba(52,211,153,0.35);
+      color: var(--green);
+    }
+
+    .status-pill.is-offline {
+      border-color: rgba(248,113,113,0.3);
+      color: var(--rose);
+    }
+
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--ink-3);
+      flex-shrink: 0;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .dot.online {
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green-glow), 0 0 16px var(--green-glow);
+      animation: pulse-dot 2.4s ease-in-out infinite;
+    }
+
+    .dot.offline { background: var(--rose); }
+
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 8px var(--green-glow), 0 0 16px var(--green-glow); }
+      50% { box-shadow: 0 0 14px rgba(52,211,153,0.5), 0 0 28px rgba(52,211,153,0.3); }
+    }
+
+    /* ── MAIN GRID ──────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0,1.1fr) minmax(360px,0.9fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* ── GLASS PANEL ────────────────────────────── */
+    .panel {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    }
+
+    /* ── COMPOSE PANEL ──────────────────────────── */
+    .compose {
+      padding: 28px;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+
+    .field {
+      margin-bottom: 24px;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .field-label span {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-2);
+    }
+
+    .hint {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 12px;
+      color: var(--ink-3);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    input[type="text"],
+    input:not([type="radio"]),
+    textarea {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--ink);
+      padding: 13px 16px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      -webkit-appearance: none;
+    }
+
+    input[type="text"]:focus,
+    input:not([type="radio"]):focus,
+    textarea:focus {
+      border-color: var(--border-active);
+      background: var(--surface-3);
+      box-shadow: 0 0 0 4px rgba(99,179,237,0.1), 0 0 20px rgba(99,179,237,0.08);
+    }
+
+    textarea {
+      min-height: 160px;
+      resize: vertical;
+      line-height: 1.65;
+    }
+
+    /* ── SAMPLE CHIPS ───────────────────────────── */
+    .samples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--ink-2);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.15s;
+    }
+
+    .chip:hover {
+      border-color: rgba(79,158,255,0.4);
+      color: var(--blue);
+      background: rgba(79,158,255,0.06);
+      transform: translateY(-1px);
+    }
+
+    /* ── MODEL CARDS ────────────────────────────── */
+    .models {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .model-card {
+      position: relative;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      border-radius: 14px;
+      padding: 16px 14px;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    .model-card input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .model-icon {
+      font-size: 20px;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .model-card strong {
+      display: block;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--ink);
+      margin-bottom: 5px;
+    }
+
+    .model-card p {
+      color: var(--ink-3);
+      font-size: 11px;
+      line-height: 1.5;
+      font-weight: 300;
+    }
+
+    .model-check {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: transparent;
+      transition: all 0.2s;
+    }
+
+    .model-card:has(input:checked) {
+      border-color: var(--blue);
+      background: rgba(79,158,255,0.08);
+      box-shadow: 0 0 20px rgba(79,158,255,0.12), inset 0 0 0 1px rgba(79,158,255,0.15);
+      transform: translateY(-2px);
+    }
+
+    .model-card:has(input:checked) .model-check {
+      border-color: var(--blue);
+      background: var(--blue);
+      box-shadow: 0 0 10px var(--blue-glow);
+    }
+
+    .model-card:has(input:checked) .model-check::after {
+      content: '';
+      display: block;
+      width: 5px;
+      height: 3px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translate(1px, -1px);
+      margin: auto;
+      position: relative;
+      top: 4px;
+      left: 3px;
+    }
+
+    .model-card:hover:not(:has(input:checked)) {
+      border-color: rgba(255,255,255,0.15);
+      background: var(--surface-3);
+      transform: translateY(-1px);
+    }
+
+    /* ── ACTION ROW ─────────────────────────────── */
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .primary {
+      border: 0;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--blue), #3b82f6);
+      color: #fff;
+      padding: 15px 22px;
+      font: inherit;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(79,158,255,0.35), 0 1px 0 rgba(255,255,255,0.15) inset;
+    }
+
+    .primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+    }
+
+    .primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(79,158,255,0.45), 0 1px 0 rgba(255,255,255,0.15) inset;
+    }
+
+    .primary:active:not(:disabled) { transform: translateY(0); }
+
+    .primary:disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
+
+    .primary .btn-inner {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .icon-btn {
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--ink-2);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+
+    .icon-btn:hover {
+      border-color: rgba(255,255,255,0.18);
+      color: var(--ink);
+      background: var(--surface-3);
+      transform: translateY(-1px);
+    }
+
+    /* ── RESULTS PANEL ──────────────────────────── */
+    .results {
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+
+    .result-head {
+      padding: 22px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+
+    .model-used {
+      color: var(--ink-3);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+
+    .count-badge {
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-2);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .result-body {
+      padding: 22px 24px 26px;
+      min-height: 380px;
+    }
+
+    /* ── EMPTY STATE ────────────────────────────── */
+    .empty {
+      display: grid;
+      place-items: center;
+      min-height: 300px;
+      border: 1px dashed rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 32px;
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 40px;
+      margin-bottom: 14px;
+      opacity: 0.4;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .empty strong {
+      display: block;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--ink-2);
+      margin-bottom: 8px;
+    }
+
+    .empty p {
+      color: var(--ink-3);
+      font-size: 13px;
+      line-height: 1.6;
+      max-width: 240px;
+    }
+
+    /* ── TOP EMOTION ────────────────────────────── */
+    .top-emotion {
+      background: linear-gradient(135deg, rgba(79,158,255,0.1), rgba(167,139,250,0.08));
+      border: 1px solid rgba(99,179,237,0.2);
+      border-radius: 16px;
+      padding: 20px 22px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .top-emotion::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(79,158,255,0.15), transparent 70%);
+    }
+
+    .top-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .top-label::before {
+      content: '';
+      display: inline-block;
+      width: 14px; height: 1px;
+      background: var(--cyan);
+    }
+
+    .top-emotion-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(28px, 4vw, 38px);
+      letter-spacing: -0.02em;
+      text-transform: capitalize;
+      background: linear-gradient(135deg, #fff 20%, var(--cyan) 70%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+    }
+
+    .top-confidence {
+      font-size: 13px;
+      color: var(--ink-2);
+      margin-top: 6px;
+    }
+
+    .top-confidence strong {
+      color: var(--green);
+    }
+
+    /* ── EMOTION LIST ───────────────────────────── */
+    .emotion-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .emotion-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 52px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: background 0.2s, border-color 0.2s;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .emotion-row:hover {
+      background: var(--surface-2);
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    .emotion-name {
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: capitalize;
+      color: var(--ink);
+    }
+
+    .bar {
+      height: 6px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--green), var(--cyan), var(--blue));
+      transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 8px rgba(52,211,153,0.4);
+    }
+
+    .score {
+      color: var(--ink-2);
+      font-size: 12px;
+      font-weight: 600;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── ERROR ──────────────────────────────────── */
+    .error {
+      background: rgba(248,113,113,0.08);
+      border: 1px solid rgba(248,113,113,0.25);
+      color: #fca5a5;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    /* ── DIVIDER ────────────────────────────────── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── FOOTER ─────────────────────────────────── */
+    footer {
+      color: var(--ink-3);
+      font-size: 12px;
+      text-align: center;
+      padding: 8px 0 0;
+      animation: fadeUp 0.7s 0.3s ease both;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    footer::before,
+    footer::after {
+      content: '';
+      width: 40px;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── LOADING SPINNER ────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    /* ── ANALYZING STATE ────────────────────────── */
+    .analyzing {
+      display: grid;
+      place-items: center;
+      min-height: 300px;
+      text-align: center;
+    }
+
+    .analyzing-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .analyzing-ring {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue);
+      border-right-color: var(--violet);
+      animation: spin 1.2s linear infinite;
+      box-shadow: 0 0 20px var(--blue-glow);
+    }
+
+    .analyzing strong {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      color: var(--ink-2);
+      font-size: 14px;
+    }
+
+    /* ── ANIMATIONS ─────────────────────────────── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* ── RESPONSIVE ─────────────────────────────── */
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      header { flex-wrap: wrap; }
+      .models { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .app { width: calc(100% - 24px); padding: 20px 0 40px; }
+      .compose, .result-body { padding: 18px; }
+      .result-head { padding: 18px; }
+      .actions { grid-template-columns: 1fr; }
+      .emotion-row { grid-template-columns: 100px 1fr 44px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="header-brand">
+        <div class="brand-icon">🧠</div>
+        <div class="header-text">
+          <h1>GoEmotions Studio</h1>
+          <p class="subtitle">Compare Logistic Regression, LSTM &amp; Transformer predictions from your Colab API</p>
+        </div>
+      </div>
+      <div class="status-pill" id="statusPill">
+        <span class="dot" id="statusDot"></span>
+        <span id="statusText">Checking API…</span>
+      </div>
+    </header>
+
+    <section class="grid">
+      <!-- ── LEFT: COMPOSE ── -->
+      <form class="panel compose" id="predictForm">
+
+        <div class="field">
+          <div class="field-label">
+            <span>API Endpoint</span>
+            <span class="hint">ngrok base URL</span>
+          </div>
+          <input id="apiUrl" type="text" value="https://b1de-34-34-47-199.ngrok-free.app" autocomplete="off" spellcheck="false" placeholder="https://xxxx.ngrok-free.app">
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span>Text to Analyze</span>
+            <span class="hint" id="charCount">0 characters</span>
+          </div>
+          <textarea id="text">I am very happy and excited today</textarea>
+          <div class="samples">
+            <button class="chip" type="button" data-sample="I am proud of myself, but still nervous about what happens next.">Mixed</button>
+            <button class="chip" type="button" data-sample="Thank you so much, that was incredibly kind and helpful.">Gratitude</button>
+            <button class="chip" type="button" data-sample="I feel disappointed and sad because the plan failed again.">Sadness</button>
+            <button class="chip" type="button" data-sample="That surprise ending scared me at first, then made me laugh.">Surprise</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span>Model</span>
+          </div>
+          <div class="models">
+            <label class="model-card">
+              <input type="radio" name="model" value="logistic" checked>
+              <span class="model-check"></span>
+              <span class="model-icon">⚡</span>
+              <strong>Logistic</strong>
+              <p>Fast baseline using TF-IDF features.</p>
+            </label>
+            <label class="model-card">
+              <input type="radio" name="model" value="lstm">
+              <span class="model-check"></span>
+              <span class="model-icon">🔁</span>
+              <strong>LSTM</strong>
+              <p>Sequence model trained with PyTorch.</p>
+            </label>
+            <label class="model-card">
+              <input type="radio" name="model" value="transformer">
+              <span class="model-check"></span>
+              <span class="model-icon">🤖</span>
+              <strong>Transformer</strong>
+              <p>DistilBERT fine-tuned for emotions.</p>
+            </label>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="predictBtn" type="submit">
+            <span class="btn-inner">
+              <span id="btnIcon">→</span>
+              <span id="btnText">Predict Emotion</span>
+            </span>
+          </button>
+          <button class="icon-btn" id="checkBtn" type="button">Check API</button>
+        </div>
+
+      </form>
+
+      <!-- ── RIGHT: RESULTS ── -->
+      <aside class="panel results">
+        <div class="result-head">
+          <div>
+            <h2 class="result-title">Prediction</h2>
+            <div class="model-used" id="modelUsed">Waiting for input</div>
+          </div>
+          <div class="count-badge" id="countUsed">0 emotions</div>
+        </div>
+        <div class="result-body" id="resultBody">
+          <div class="empty">
+            <div>
+              <div class="empty-icon">🌌</div>
+              <strong>No result yet</strong>
+              <p>Start the Colab Flask cell, paste the ngrok URL, then run a prediction.</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <footer>
+      Keep the Colab cell running while using this page · A new Colab session creates a new ngrok URL
+    </footer>
+  </div>
+
+  <script>
+    const apiUrlInput  = document.getElementById("apiUrl");
+    const textInput    = document.getElementById("text");
+    const form         = document.getElementById("predictForm");
+    const predictBtn   = document.getElementById("predictBtn");
+    const checkBtn     = document.getElementById("checkBtn");
+    const resultBody   = document.getElementById("resultBody");
+    const statusPill   = document.getElementById("statusPill");
+    const statusDot    = document.getElementById("statusDot");
+    const statusText   = document.getElementById("statusText");
+    const modelUsed    = document.getElementById("modelUsed");
+    const countUsed    = document.getElementById("countUsed");
+    const charCount    = document.getElementById("charCount");
+    const btnText      = document.getElementById("btnText");
+    const btnIcon      = document.getElementById("btnIcon");
+
+    function apiBase() { return apiUrlInput.value.trim().replace(/\/+$/, ""); }
+    function selectedModel() { return document.querySelector("input[name='model']:checked").value; }
+
+    function setStatus(state, text) {
+      statusDot.className = "dot " + state;
+      statusText.textContent = text;
+      statusPill.className = "status-pill" + (state === "online" ? " is-online" : state === "offline" ? " is-offline" : "");
+    }
+
+    function setLoading(isLoading) {
+      predictBtn.disabled = isLoading;
+      if (isLoading) {
+        btnIcon.innerHTML = '<span class="spinner"></span>';
+        btnText.textContent = "Analyzing…";
+      } else {
+        btnIcon.textContent = "→";
+        btnText.textContent = "Predict Emotion";
+      }
+    }
+
+    function showError(message) {
+      resultBody.innerHTML = `<div class="error">${message}</div>`;
+      countUsed.textContent = "Error";
+    }
+
+    function updateCount() {
+      charCount.textContent = `${textInput.value.length} characters`;
+    }
+
+    function renderResult(data) {
+      const emotions = data.emotions || [];
+      modelUsed.textContent = `${data.model || selectedModel()} model`;
+      countUsed.textContent = `${emotions.length} emotion${emotions.length === 1 ? "" : "s"}`;
+
+      if (emotions.length === 0) {
+        resultBody.innerHTML = `
+          <div class="empty">
+            <div>
+              <div class="empty-icon">🔍</div>
+              <strong>Below threshold</strong>
+              <p>No emotion crossed the confidence threshold. Try a more expressive sentence or a different model.</p>
+            </div>
+          </div>`;
+        return;
+      }
+
+      const top = emotions[0];
+      const rows = emotions.map((item, i) => {
+        const percent = Math.round(item.probability * 100);
+        return `
+          <div class="emotion-row" style="animation-delay:${i * 0.06}s">
+            <div class="emotion-name">${item.emotion}</div>
+            <div class="bar"><span id="bar-${i}" style="width:0%"></span></div>
+            <div class="score">${percent}%</div>
+          </div>`;
+      }).join("");
+
+      const coachSection = `
+      <div class="top-emotion" style="margin-top:20px;">
+        <div class="top-label">🤖 Emotion Coach</div>
+        <div style="
+        margin-top:12px;
+        color:var(--ink-2);
+        line-height:1.8;
+        font-size:14px;
+        white-space:pre-wrap;
+      ">
+        ${data.coach_response || "No response available."}
+      </div>
+    </div>
+    `;
+
+      resultBody.innerHTML = `
+      <div class="top-emotion">
+        <div class="top-label">Top Emotion</div>
+        <div class="top-emotion-name">${top.emotion}</div>
+        <div class="top-confidence">
+          <strong>${Math.round(top.probability * 100)}%</strong> confidence
+          </div>
+        </div>
+        <div class="section-divider">All Detected</div>
+        <div class="emotion-list">
+          ${rows}
+        </div>
+        ${coachSection}
+    `;
+
+      // Animate bars after render
+      requestAnimationFrame(() => {
+        emotions.forEach((item, i) => {
+          const bar = document.getElementById("bar-" + i);
+          if (bar) {
+            setTimeout(() => {
+              bar.style.width = Math.round(item.probability * 100) + "%";
+            }, i * 60);
+          }
+        });
+      });
+    }
+
+    async function checkApi() {
+      const url = apiBase();
+      if (!url) { setStatus("offline", "Missing URL"); return; }
+      setStatus("", "Checking…");
+      try {
+        const res = await fetch(`${url}/ping`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        setStatus("online", "API online");
+      } catch {
+        setStatus("offline", "API offline");
+      }
+    }
+
+    async function predict(event) {
+      event.preventDefault();
+      const url   = apiBase();
+      const text  = textInput.value.trim();
+      const model = selectedModel();
+
+      if (!url || !text) { showError("Enter both API URL and text."); return; }
+
+      setLoading(true);
+      resultBody.innerHTML = `
+        <div class="analyzing">
+          <div class="analyzing-inner">
+            <div class="analyzing-ring"></div>
+            <strong>Analyzing with ${model}…</strong>
+          </div>
+        </div>`;
+
+      try {
+        const res = await fetch(`${url}/predict`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, model })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+        setStatus("online", "API online");
+        renderResult(data);
+      } catch (err) {
+        setStatus("offline", "API issue");
+        showError(`Could not get prediction.\n\n${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    document.querySelectorAll("[data-sample]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        textInput.value = btn.dataset.sample;
+        updateCount();
+        textInput.focus();
+      });
+    });
+
+    textInput.addEventListener("input", updateCount);
+    checkBtn.addEventListener("click", checkApi);
+    form.addEventListener("submit", predict);
+
+    updateCount();
+    checkApi();
+  </script>
+</body>
+</html>
